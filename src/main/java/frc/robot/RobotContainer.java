@@ -7,8 +7,6 @@
 
 package frc.robot;
 
-import edu.wpi.cscore.HttpCamera;
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -24,7 +22,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -34,12 +31,10 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.LimelightControlMode.StreamType;
 import frc.robot.commands.AutoSwitchZoom;
 import frc.robot.commands.EndLogData;
-import frc.robot.commands.StartRearIntake;
 import frc.robot.commands.LockTiltOnTarget;
 import frc.robot.commands.LockTurretOnTarget;
 import frc.robot.commands.LogDistanceData;
 import frc.robot.commands.LogTrajData;
-import frc.robot.commands.PositionHoldTilt;
 import frc.robot.commands.PositionTilt;
 import frc.robot.commands.PositionTiltandLock;
 import frc.robot.commands.PositionTurret;
