@@ -94,17 +94,18 @@ public final class Constants {
       public static final double MIN_SPEED = 1500.;
       public static final double SPEED_INCREMENT = 250.;
 
-      public static final double TURRET_MAX_TURNS = 100;
-      public static final double TURRET_MIN_TURNS = -100;
+      public static final double TURRET_MAX_ANGLE = 100;
+      public static final double TURRET_MIN_ANGLE = -100;
       public static final double TurretSpeed = 0.025;
       /**
-       * 100 revs of turret motor turns an 18 tooth pinion one time There are 222
-       * teeth in 360 degrees, so 1 tooth = 360/220 = 1.64 degrees So 18 teeth (100
-       * revs) = 18 * 1.64 = 29.5 degrees and one motor rev is .295 degrees
+       * 100 output revs of turret gearbox turns an 18 tooth pinion one time There are
+       * 222 teeth in 360 degrees, so 1 tooth = 360/220 = 1.64 degrees So 18 teeth
+       * (100 revs) = 18 * 1.64 = 29.5 degrees and one gearbox output rev is .295
+       * degrees With a 100:1 gearbox that makes 1 motor / encoder rev = .00295degrees
        */
-      public static final double TURRET_ENCODER_DEG_PER_REV = .295;
+      public static final double TURRET_ENCODER_DEG_PER_REV = .00295;
 
-      public static final double TILT_DEG_PER_ENCODER_REV = 2.9;
+      public static final double TILT_DEG_PER_ENCODER_REV = .029;
       public static final double TILT_MIN_TURNS = 0;
       public static final double TILT_MAX_TURNS = 10;
 
@@ -123,7 +124,8 @@ public final class Constants {
    public static final class CellTransportConstants {
       public static final int FRONT_ROLLER = 17;
       public static final int REAR_ROLLER = 18;
-      public static final int BELT_MOTOR = 19;
+      public static final int LEFT_BELT_MOTOR = 19;
+      public static final int RIGHT_BELT_MOTOR = 21;
       public static final double FRONT_PASS_SPEED = .5;
       public static final double FRONT_SHOOT_SPEED = .56;
       public static final double REAR_PASS_SPEED = -.5;

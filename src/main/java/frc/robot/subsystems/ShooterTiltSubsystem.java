@@ -7,38 +7,31 @@
 
 package frc.robot.subsystems;
 
-import java.util.List;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-import com.revrobotics.CANDigitalInput;
-import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMax.SoftLimitDirection;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Pref;
 import frc.robot.Constants.HoodedShooterConstants;
+import frc.robot.Pref;
 
 public class ShooterTiltSubsystem extends SubsystemBase {
    /**
     * Creates a new ShooterTurret.
     */
 
-   private final CANSparkMax m_tiltMotor = new CANSparkMax(HoodedShooterConstants.TILT_MOTOR, MotorType.kBrushless);
+   public final WPI_TalonSRX m_tiltMotor = new WPI_TalonSRX(HoodedShooterConstants.TILT_MOTOR);
 
-   private final CANEncoder m_tiltEncoder = m_tiltMotor.getEncoder();
+   private final Encoder m_tiltEncoder = new Encoder(1, 2);
+
+   private final double k_encoderCountsPerDegree = 1 / HoodedShooterConstants.TILT_DEG_PER_ENCODER_REV;
+
    private final PIDController tiltPositionController = new PIDController(.05, 0.01, 0);
    private final PIDController tiltLockController = new PIDController(.032, 0.001, 0);
    public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM, maxVel, minVel, maxAcc, allowedErr;
-
-   public CANDigitalInput m_reverseLimit;
-
-   public String kEnable;
-   public String kDisable;
 
    public double requiredTiltAngle;
 
@@ -54,53 +47,41 @@ public class ShooterTiltSubsystem extends SubsystemBase {
 
    private boolean switchPositionLast;
 
-   public List<Integer> sparkMaxID;
-   public List<CANSparkMax> motor;
+   public double lastHoldPositionDegrees;
+   public double holdPositionDegrees;
+
+public DigitalInput m_reverseLimit = new DigitalInput(6);
+   private double tiltTargetPosition;
 
    public ShooterTiltSubsystem() {
-      m_tiltMotor.restoreFactoryDefaults();
-
-      // motor.add(m_tiltMotor);
-      // sparkMaxID.add(m_tiltMotor.getDeviceId());
-
-      m_tiltMotor.setClosedLoopRampRate(5.);
-      m_tiltMotor.setOpenLoopRampRate(1);
-      m_tiltMotor.setSmartCurrentLimit(60, 60);
-
-      m_reverseLimit = m_tiltMotor.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed);
-      m_reverseLimit.enableLimitSwitch(true);
-
+      m_tiltEncoder.setDistancePerPulse(k_encoderCountsPerDegree);
       positionResetDone = false;
       targetVerticalOffset = 0;
-      
+
       setTiltPosGains();
       setTiltLockGains();
 
-      m_tiltMotor.setIdleMode(IdleMode.kBrake);
       if (m_reverseLimit.get()) {
          resetTiltPosition();
          positionCommandTurns = 0;
          positionResetDone = true;
 
-         m_tiltMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward,
-               (float) HoodedShooterConstants.TILT_MAX_TURNS);
-         m_tiltMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
-
-         m_tiltMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse,
-               (float) HoodedShooterConstants.TILT_MIN_TURNS);
-         m_tiltMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
-         SmartDashboard.putNumber("Tilt Fwd Soft Limit",
-               m_tiltMotor.getSoftLimit(CANSparkMax.SoftLimitDirection.kForward));
-         SmartDashboard.putNumber("Tilt Rev Soft Limit",
-               m_tiltMotor.getSoftLimit(CANSparkMax.SoftLimitDirection.kReverse));
-         SmartDashboard.putBoolean("Forward Soft Limit Enabled",
-               m_tiltMotor.isSoftLimitEnabled(CANSparkMax.SoftLimitDirection.kForward));
-         SmartDashboard.putBoolean("Reverse Soft Limit Enabled",
-               m_tiltMotor.isSoftLimitEnabled(CANSparkMax.SoftLimitDirection.kReverse));
       }
 
       SmartDashboard.putString("TiltState", "Init");
 
+   }
+
+   public double getTiltSpeedCountsPer100mS() {
+      return m_tiltEncoder.getRate() * 10;
+   }
+
+   public double getTiltPositionDegrees() {
+      return m_tiltEncoder.getDistance();
+   }
+
+   public boolean inPosition() {
+      return Math.abs(tiltTargetPosition - getTiltPositionDegrees()) < 2;
    }
 
    @Override
@@ -112,33 +93,16 @@ public class ShooterTiltSubsystem extends SubsystemBase {
          positionCommandTurns = 0;
          positionResetDone = true;
 
-         m_tiltMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward,
-               (float) HoodedShooterConstants.TILT_MAX_TURNS);
-         m_tiltMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
-
-         m_tiltMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse,
-               (float) HoodedShooterConstants.TILT_MIN_TURNS);
-         m_tiltMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
-         SmartDashboard.putNumber("Tilt Fwd Soft Limit",
-               m_tiltMotor.getSoftLimit(CANSparkMax.SoftLimitDirection.kForward));
-         SmartDashboard.putNumber("Tilt Rev Soft Limit",
-               m_tiltMotor.getSoftLimit(CANSparkMax.SoftLimitDirection.kReverse));
-         SmartDashboard.putBoolean("Forward Soft Limit Enabled",
-               m_tiltMotor.isSoftLimitEnabled(CANSparkMax.SoftLimitDirection.kForward));
-         SmartDashboard.putBoolean("Reverse Soft Limit Enabled",
-               m_tiltMotor.isSoftLimitEnabled(CANSparkMax.SoftLimitDirection.kReverse));
-
       }
-      switchPositionLast = m_reverseLimit.get();
 
       displaySelect++;
       if (displaySelect >= 7) {
          displaySelect = 0;
 
-         SmartDashboard.putNumber("TiltPosn", getTiltPosition());
+         SmartDashboard.putNumber("TiltPosn", getTiltPositionDegrees());
          SmartDashboard.putNumber("Tilt Angle", getTiltAngle());
          SmartDashboard.putNumber("Tilt OUT", getTiltOut());
-         SmartDashboard.putNumber("Tilt Amps", m_tiltMotor.getOutputCurrent());
+         SmartDashboard.putNumber("Tilt Amps", m_tiltMotor.getStatorCurrent());
          SmartDashboard.putBoolean("Tilt Down R LS", m_reverseLimit.get());
          SmartDashboard.putNumber("TiltComTrns", positionCommandTurns);
          SmartDashboard.putBoolean("TILT DOWN LIMITS", positionResetDone);
@@ -147,12 +111,12 @@ public class ShooterTiltSubsystem extends SubsystemBase {
    }
 
    public void resetTiltPosition() {
-      m_tiltEncoder.setPosition(0.);
+      m_tiltEncoder.reset();
       positionCommandTurns = 0;
    }
 
    public void jogTilt(double speed) {
-      positionCommandTurns = m_tiltEncoder.getPosition();
+      positionCommandTurns = m_tiltEncoder.getDistance();
       SmartDashboard.putString("TiltState", "Jogging");
 
       m_tiltMotor.set(speed);
@@ -165,7 +129,7 @@ public class ShooterTiltSubsystem extends SubsystemBase {
 
    public void positionTilttoTurns() {
 
-      double pidOut = tiltPositionController.calculate(getTiltPosition(), positionCommandTurns);
+      double pidOut = tiltPositionController.calculate(getTiltPositionDegrees(), positionCommandTurns);
       m_tiltMotor.set(pidOut);
       SmartDashboard.putNumber("PIDORRTilt", pidOut);
       // positionCommandTurns = getTiltPosition();
@@ -178,12 +142,8 @@ public class ShooterTiltSubsystem extends SubsystemBase {
       return m_tiltMotor.get();
    }
 
-   public double getTiltPosition() {
-      return m_tiltEncoder.getPosition();
-   }
-
    public double getTiltAngle() {
-      return m_tiltEncoder.getPosition() * HoodedShooterConstants.TILT_DEG_PER_ENCODER_REV;
+      return m_tiltEncoder.getDistance();
    };
 
    public boolean getTiltInPosition() {
@@ -191,7 +151,11 @@ public class ShooterTiltSubsystem extends SubsystemBase {
    }
 
    public double getTiltSpeed() {
-      return m_tiltEncoder.getVelocity();
+      return m_tiltEncoder.getRate();
+   }
+
+   public void runTiltMotor(double speed) {
+      m_tiltMotor.set(ControlMode.Velocity, speed);
    }
 
    public boolean lockTiltToVision(double cameraError) {
@@ -199,7 +163,7 @@ public class ShooterTiltSubsystem extends SubsystemBase {
       m_tiltMotor.set(pidOut);
       SmartDashboard.putNumber("PIDOTilt", pidOut);
       SmartDashboard.putNumber("TILockErr", tiltLockController.getPositionError());
-      positionCommandTurns = getTiltPosition();
+      positionCommandTurns = getTiltPositionDegrees();
 
       SmartDashboard.putString("TiltState", "VisionLock");
 

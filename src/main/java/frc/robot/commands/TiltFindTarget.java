@@ -58,11 +58,11 @@ public class TiltFindTarget extends CommandBase {
     if (goPlus)
       jogSpeed = .05;
 
-    if (goMinus && tilt.getTiltPosition() < HoodedShooterConstants.TILT_MIN_TURNS) {
+    if (goMinus && tilt.getTiltPositionDegrees() < HoodedShooterConstants.TILT_MIN_TURNS) {
       goPlus = true;
       goMinus = false;
     }
-    if (goPlus && tilt.getTiltPosition() > HoodedShooterConstants.TILT_MAX_TURNS) {
+    if (goPlus && tilt.getTiltPositionDegrees() > HoodedShooterConstants.TILT_MAX_TURNS) {
       goMinus = true;
       goPlus = false;
     }

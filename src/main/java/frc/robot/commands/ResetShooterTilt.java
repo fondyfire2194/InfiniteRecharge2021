@@ -9,7 +9,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.ShooterTiltSubsystem;
-import frc.robot.subsystems.ShooterTurretSubsystem;
 
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -27,6 +26,6 @@ public class ResetShooterTilt extends InstantCommand {
   @Override
   public void initialize() {
     tilt.resetTiltPosition();
-    tilt.positionCommandTurns = tilt.getTiltPosition();
+    tilt.positionCommandTurns = tilt.getTiltPositionDegrees();
   }
 }

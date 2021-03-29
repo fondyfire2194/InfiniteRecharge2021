@@ -7,27 +7,21 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Robot;
-import frc.robot.Constants.HoodedShooterConstants;
 import frc.robot.subsystems.ShooterTurretSubsystem;
 
-public class PositionTurret extends CommandBase {
+public class PositionTurretToAngle extends CommandBase {
   /**
    * Creates a new PositionTilt.
    */
 
   private final ShooterTurretSubsystem turret;
+  private double angle;
+  private double inPositionCount;
 
-  private final double angle;
-  private double turns;
-  private double simStartTime;
-
-  public PositionTurret(ShooterTurretSubsystem turret, double angle) {
+  public PositionTurretToAngle(ShooterTurretSubsystem turret, double angle) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.turret = turret;
-
     this.angle = angle;
     addRequirements(turret);
   }
@@ -35,18 +29,18 @@ public class PositionTurret extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    turns = angle / HoodedShooterConstants.TURRET_ENCODER_DEG_PER_REV;
-    if (turns > HoodedShooterConstants.TURRET_MAX_TURNS)
-      turns = HoodedShooterConstants.TURRET_MAX_TURNS;
-    if (turns < HoodedShooterConstants.TURRET_MIN_TURNS)
-      turns = HoodedShooterConstants.TURRET_MIN_TURNS;
-    simStartTime = Timer.getFPGATimestamp();
+    turret.setPIDParameters();
+    inPositionCount = 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    turret.positionTurret(turns);
+    turret.positionTurretToAngle(angle);
+    if (turret.turretInPosition()) {
+      inPositionCount++;
+    } else
+      inPositionCount = 0;
   }
 
   // Called once the command ends or is interrupted.
@@ -57,8 +51,6 @@ public class PositionTurret extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(turns - turret.getTurretPosition()) < 2 && turret.getTurretSpeed() < .1
-        || Robot.isSimulation() && Timer.getFPGATimestamp() > simStartTime + 2;
-
+    return turret.turretInPosition() && inPositionCount > 10;
   }
 }

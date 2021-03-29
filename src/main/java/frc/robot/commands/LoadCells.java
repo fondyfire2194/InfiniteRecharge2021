@@ -32,9 +32,9 @@ public class LoadCells extends CommandBase {
   public void execute() {
 
     if (!transport.powerCellAtIntake.get())
-      transport.runBeltMotor(.25);
+      transport.runLeftBeltMotor(.25);
     else
-      transport.runBeltMotor(0);
+      transport.runLeftBeltMotor(0);
     ;
   }
 

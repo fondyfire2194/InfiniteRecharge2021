@@ -15,7 +15,7 @@ import frc.robot.commands.PositionHoldTilt;
 import frc.robot.commands.PositionHoldTurret;
 import frc.robot.commands.PositionTilt;
 import frc.robot.commands.PositionTiltandLock;
-import frc.robot.commands.PositionTurret;
+import frc.robot.commands.PositionTurretToAngle;
 import frc.robot.commands.PositionTurretandLock;
 import frc.robot.commands.SetCameraPipeline;
 import frc.robot.commands.ShootCells;
@@ -56,6 +56,6 @@ public class Auto2 extends SequentialCommandGroup {
 
         new ParallelCommandGroup(new ShootCells(shooter, transport, compressor, shootSpeed, shootTime)
             .deadlineWith(new ParallelCommandGroup(new PositionHoldTilt(tilt)), new PositionHoldTurret(turret))),
-        new ParallelCommandGroup(new PositionTilt(tilt, -1), new PositionTurret(turret, 0)));
+        new ParallelCommandGroup(new PositionTilt(tilt, -1), new PositionTurretToAngle(turret, 0)));
   }
 }

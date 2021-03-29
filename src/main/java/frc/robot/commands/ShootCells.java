@@ -35,7 +35,7 @@ public class ShootCells extends CommandBase {
     this.speed = speed;
     this.time = time;
 
-    addRequirements(shooter, transport);
+    addRequirements(shooter,transport);
   }
 
   // Called when the command is initially scheduled.
@@ -55,7 +55,7 @@ public class ShootCells extends CommandBase {
 
     shooter.runShooterVelMode(shooter.requiredSpeed);
     if (Timer.getFPGATimestamp() > startTime + 1) {
-      transport.pulseBelt(-.5, .5, .25);
+   //   belts.pulseBelt(-.5, .5, .25);
       // transport.runBeltMotor(CellTransportConstants.BELT_SPEED);
       transport.runFrontRollerMotor(CellTransportConstants.FRONT_SHOOT_SPEED);
       transport.runRearRollerMotor(CellTransportConstants.REAR_SHOOT_SPEED);
@@ -67,7 +67,7 @@ public class ShootCells extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    transport.runBeltMotor(0.);
+    transport.runLeftBeltMotor(0.);
     transport.runFrontRollerMotor(0.);
     transport.runRearRollerMotor(0.);
     shooter.stopShooterVeLMode();

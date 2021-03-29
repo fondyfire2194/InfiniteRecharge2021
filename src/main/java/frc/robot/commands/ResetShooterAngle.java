@@ -26,6 +26,6 @@ public class ResetShooterAngle extends InstantCommand {
   @Override
   public void initialize() {
     turret.resetTurretPosition();
-    turret.commandTurns =0;
+    turret.commandAngle =0;
   }
 }

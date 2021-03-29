@@ -7,18 +7,12 @@
 
 package frc.robot.subsystems;
 
-import java.util.List;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-import com.revrobotics.CANDigitalInput;
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.ControlType;
-import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMax.SoftLimitDirection;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,9 +23,8 @@ public class ShooterTurretSubsystem extends SubsystemBase {
     * Creates a new ShooterTurret.
     */
 
-   public CANSparkMax m_rotateMotor = new CANSparkMax(HoodedShooterConstants.ROTATE_MOTOR, MotorType.kBrushless);
-   private final CANPIDController m_rotateController = new CANPIDController(m_rotateMotor);
-   private final CANEncoder m_rotateEncoder = m_rotateMotor.getEncoder();
+   public WPI_TalonSRX m_rotateMotor = new WPI_TalonSRX(HoodedShooterConstants.ROTATE_MOTOR);
+   private final Encoder m_rotateEncoder = new Encoder(2, 3);
    private final PIDController m_turretLockController = new PIDController(.03, 0, 0);
 
    public String kEnable;
@@ -39,43 +32,43 @@ public class ShooterTurretSubsystem extends SubsystemBase {
    public double requiredTurretAngle;
 
    public double targetHorizontalOffset;
-   public double commandTurns;
+   public double commandAngle;
    private int displaySelect;
    public boolean lockOnTarget;
    public boolean changeLocked;
 
-   private CANDigitalInput m_forwardLimit;
-   private CANDigitalInput m_reverseLimit;
+   private double degreesPerEncoderCount = 1;
    public double positionCommandAngle;
 
-   public List<Integer> sparkMaxID;
-   public List<CANSparkMax> motor;
+   private static final double MAX_PCT_OUTPUT = 1.0;
+
+   private static final int TALON_TIMEOUT_MS = 20;
+   public static final int TICKS_PER_REVOLUTION = 2048; //
+
+   private static final double MOVE_PROPORTIONAL_GAIN = 0.4;
+   private static final double MOVE_INTEGRAL_GAIN = 0.0;
+   private static final double MOVE_DERIVATIVE_GAIN = 0.0;
+   static final int TALON_TICK_THRESH = 128;
+   static final double TICK_THRESH = TALON_TICK_THRESH * 4;
+   public static final double TICK_PER_100MS_THRESH = 64; // about a tenth of a rotation per second
+   static final int PRIMARY_PID_LOOP = 0;
+   private final static int MOVE_ON_TARGET_MINIMUM_COUNT = 20; // number of times/iterations we need to be on target to
+                                                               // really be on target
+
+   private final static int MOVE_STALLED_MINIMUM_COUNT = MOVE_ON_TARGET_MINIMUM_COUNT * 2 + 30; // number of
+                                                                                                // times/iterations we
+                                                                                                // need to be stalled to
+                                                                                                // really be stalled
 
    public ShooterTurretSubsystem() {
-      m_rotateMotor.restoreFactoryDefaults(true);
-      m_rotateMotor.setClosedLoopRampRate(50);
-      m_rotateMotor.setOpenLoopRampRate(2);
+      m_rotateMotor.set(ControlMode.PercentOutput, 0);
+      m_rotateMotor.configFactoryDefault();
+      m_rotateMotor.setNeutralMode(NeutralMode.Brake);
+      m_rotateMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, PRIMARY_PID_LOOP, TALON_TIMEOUT_MS);
 
-      m_rotateMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward,
-            (float) HoodedShooterConstants.TURRET_MAX_TURNS);
-      m_rotateMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse,
-            (float) HoodedShooterConstants.TURRET_MIN_TURNS);
-      m_rotateMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
-      m_rotateMotor.enableSoftLimit(SoftLimitDirection.kReverse, false);
-      m_rotateMotor.setIdleMode(IdleMode.kBrake);
-
-      // motor.add(m_rotateMotor);
-      // sparkMaxID.add(m_rotateMotor.getDeviceId());
-
-      // m_forwardLimit =
-      // m_rotateMotor.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed);
-      // m_reverseLimit =
-      // m_rotateMotor.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed);
-      // m_forwardLimit.enableLimitSwitch(false);
-      // m_reverseLimit.enableLimitSwitch(false);
-      setTurretGains();
+      setPIDParameters();
       resetTurretPosition();
-      commandTurns = 0;
+      commandAngle = 0;
       targetHorizontalOffset = 0;
       lockOnTarget = true;
       SmartDashboard.putString("TurretState", "Init");
@@ -89,78 +82,56 @@ public class ShooterTurretSubsystem extends SubsystemBase {
       if (displaySelect >= 23) {
          displaySelect = 0;
          SmartDashboard.putNumber("Turret Angle", getTurretAngle());
-         SmartDashboard.putNumber("Turret Revs", getTurretEncoderRevs());
-         SmartDashboard.putNumber("Turret OUT", getTurnOut());
-         SmartDashboard.putNumber("Turret Command", commandTurns);
-         SmartDashboard.putNumber("Turret Amps", m_rotateMotor.getOutputCurrent());
+         SmartDashboard.putNumber("Turret Amps", m_rotateMotor.getStatorCurrent());
 
       }
    }
 
    public double getTurretEncoderRevs() {
-      return m_rotateEncoder.getPosition();
+      return m_rotateEncoder.getDistance();
    }
 
-   public double getTurnOut() {
+   public double getTurretOut() {
       return m_rotateMotor.get();
    }
 
    public void resetTurretPosition() {
-      m_rotateEncoder.setPosition(0.);
-      commandTurns = 0;
-   }
-
-   public double getTurretPosition() {
-      return m_rotateEncoder.getPosition();
-   }
-
-   public double getTurretSpeed() {
-      return m_rotateEncoder.getVelocity();
+      m_rotateEncoder.reset();
+      commandAngle = 0;
    }
 
    public double getTurretAngle() {
-      return getTurretEncoderRevs() * HoodedShooterConstants.TURRET_ENCODER_DEG_PER_REV;
+      return m_rotateEncoder.getDistance();
+   }
+
+   public double getTurretSpeed() {
+      return m_rotateEncoder.getRate();
    }
 
    public void jogTurret(double speed) {
-      commandTurns = m_rotateEncoder.getPosition();
-      m_rotateMotor.set(speed);
-   }
-
-   public void jogTurretVel(double speed) {
-      commandTurns = m_rotateEncoder.getPosition();
-      m_rotateController.setReference(speed, ControlType.kVelocity);
-      SmartDashboard.putString("TurretState", "Jogging");
+      commandAngle = m_rotateEncoder.getDistance();
+      m_rotateMotor.set(ControlMode.PercentOutput, speed);
    }
 
    public void positionTurretToAngle(double angle) {
-      commandTurns = angle / HoodedShooterConstants.TURRET_ENCODER_DEG_PER_REV;
-      positionTurretToTurns();
+      commandAngle = angle;
+      m_rotateMotor.set(ControlMode.Position, angle);
    }
 
    public boolean lockTurretToVision(double cameraError) {
       double pidOut = m_turretLockController.calculate(cameraError, 0);
-      m_rotateMotor.set(pidOut);
+      m_rotateMotor.set(ControlMode.PercentOutput, pidOut);
       SmartDashboard.putNumber("PIDO", pidOut);
-      commandTurns = getTurretPosition();
+      commandAngle = getTurretAngle();
       SmartDashboard.putString("TurretState", "VisionLock");
       return m_turretLockController.atSetpoint();
    }
 
-   public void positionTurretToTurns() {
-      m_rotateController.setReference(commandTurns, ControlType.kSmartMotion);
-      SmartDashboard.putString("TurretState", "Positioning");
-   }
+public boolean turretInPosition(){
 
-   public void positionTurret(double turns) {
-      commandTurns = turns;
-      positionTurretToTurns();
-   }
+return Math.abs(commandAngle-getTurretAngle())<2;
 
-   public boolean getRotateInPosition() {
-      return false;
-   }
-
+}
    public void changeTurretOffset(boolean right) {
       if (right)
          targetHorizontalOffset += .25;
@@ -170,37 +141,42 @@ public class ShooterTurretSubsystem extends SubsystemBase {
 
    public double iterateTurretPosition(double speed) {
 
-      return commandTurns + speed / 100;
+      return commandAngle + speed / 100;
    }
 
-   public void setTurretGains() {
-      double kP = 6e-5;
-      double kI = 1e-6;
-      double kD = 0;
-      double kIz = 10;
-      double kFF = 0.0002;
-      double kMaxOutput = .25;
-      double kMinOutput = -.25;
-      double maxRPM = 5700;
+   public void setPIDParameters() {
+      m_rotateMotor.configAllowableClosedloopError(0, TALON_TICK_THRESH, TALON_TIMEOUT_MS);
 
-      // Smart Motion Coeffic ients
-      double maxVel = 1500; // rpm
-      double maxAcc = 2500;
-      double minVel = 0;
-      double allowedErr = 0;
+      // P is the proportional gain. It modifies the closed-loop output by a
+      // proportion (the gain value)
+      // of the closed-loop error.
+      // P gain is specified in output unit per error unit.
+      // When tuning P, it's useful to estimate your starting value.
+      // If you want your mechanism to drive 50% output when the error is 4096 (one
+      // rotation when using CTRE Mag Encoder),
+      // then the calculated Proportional Gain would be (0.50 X 1023) / 4096 = ~0.125.
 
-      // set PID coefficients
-      m_rotateController.setP(kP);
-      m_rotateController.setI(kI);
-      m_rotateController.setD(kD);
-      m_rotateController.setIZone(kIz);
-      m_rotateController.setFF(kFF);
-      m_rotateController.setOutputRange(kMinOutput, kMaxOutput);
-      int smartMotionSlot = 0;
-      m_rotateController.setSmartMotionMaxVelocity(maxVel, smartMotionSlot);
-      m_rotateController.setSmartMotionMinOutputVelocity(minVel, smartMotionSlot);
-      m_rotateController.setSmartMotionMaxAccel(maxAcc, smartMotionSlot);
-      m_rotateController.setSmartMotionAllowedClosedLoopError(allowedErr, smartMotionSlot);
+      // I is the integral gain. It modifies the closed-loop output according to the
+      // integral error
+      // (summation of the closed-loop error each iteration).
+      // I gain is specified in output units per integrated error.
+      // If your mechanism never quite reaches your target and using integral gain is
+      // viable,
+      // start with 1/100th of the Proportional Gain.
+
+      // D is the derivative gain. It modifies the closed-loop output according to the
+      // derivative error
+      // (change in closed-loop error each iteration).
+      // D gain is specified in output units per derivative error.
+      // If your mechanism accelerates too abruptly, Derivative Gain can be used to
+      // smooth the motion.
+      // Typically start with 10x to 100x of your current Proportional Gain.
+
+      m_rotateMotor.config_kP(0, MOVE_PROPORTIONAL_GAIN, TALON_TIMEOUT_MS);
+      m_rotateMotor.config_kI(0, MOVE_INTEGRAL_GAIN, TALON_TIMEOUT_MS);
+      m_rotateMotor.config_kD(0, MOVE_DERIVATIVE_GAIN, TALON_TIMEOUT_MS);
+      m_rotateMotor.config_kF(0, 0, TALON_TIMEOUT_MS);
+
    }
 
 }

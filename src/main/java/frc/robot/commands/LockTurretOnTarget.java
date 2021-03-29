@@ -40,7 +40,7 @@ public class LockTurretOnTarget extends CommandBase {
   @Override
   public void execute() {
     autoLookForTarget = DriverStation.getInstance().isAutonomous()
-        && Math.abs(turret.commandTurns - turret.getTurretPosition()) < 50
+        && Math.abs(turret.commandAngle - turret.getTurretAngle()) < 50
         && Math.abs(limelight.getdegRotationToTarget()) < 10.;
 
     teleopLookForTarget = DriverStation.getInstance().isOperatorControl()
@@ -59,18 +59,18 @@ public class LockTurretOnTarget extends CommandBase {
 
       if (targetSeen) {
 
-        turret.commandTurns = turret.getTurretPosition();
+        turret.commandAngle = turret.getTurretAngle();
 
         targetSeen = false;
       }
-      turret.positionTurretToTurns();
+      turret.positionTurretToAngle(turret.commandAngle);
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    turret.commandTurns = turret.getTurretPosition();
+    turret.commandAngle = turret.getTurretAngle();
   }
 
   // Returns true when the command should end.

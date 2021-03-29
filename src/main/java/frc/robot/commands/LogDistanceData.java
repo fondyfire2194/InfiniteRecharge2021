@@ -73,8 +73,8 @@ public class LogDistanceData extends CommandBase {
         targetSeen = 1;
 
       drive.simpleCSVLogger.writeData((double) step, drive.getLeftDistanceMeters(), drive.getRightDistanceMeters(),
-          drive.getAverageDistanceMeters(), drive.getLeftEncoderMps(), drive.getGyroAngle(), tilt.getTiltPosition(),
-          turret.getTurretPosition(), targetSeen, limelight.getBoundingBoxHeight(), limelight.getBoundingBoxWidth(),
+          drive.getAverageDistanceMeters(), drive.getLeftEncoderMps(), drive.getGyroAngle(), tilt.getTiltPositionDegrees(),
+          turret.getTurretAngle(), targetSeen, limelight.getBoundingBoxHeight(), limelight.getBoundingBoxWidth(),
           limelight.getTargetArea(), limelight.getdegRotationToTarget(), limelight.getdegVerticalToTarget());
     }
 

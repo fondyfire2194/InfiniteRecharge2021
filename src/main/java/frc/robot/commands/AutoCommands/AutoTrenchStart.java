@@ -16,7 +16,7 @@ import frc.robot.commands.PositionHoldTilt;
 import frc.robot.commands.PositionHoldTurret;
 import frc.robot.commands.PositionTilt;
 import frc.robot.commands.PositionTiltandLock;
-import frc.robot.commands.PositionTurret;
+import frc.robot.commands.PositionTurretToAngle;
 import frc.robot.commands.PositionTurretandLock;
 import frc.robot.commands.SetCameraPipeline;
 import frc.robot.commands.ShootCells;
@@ -71,7 +71,7 @@ public class AutoTrenchStart extends SequentialCommandGroup {
 
     super(new TiltMoveToReverseLimit(tilt), new SetCameraPipeline(limelight, pipeline), new StartShooter(shooter),
         new StartRearIntake(rearIntake),
-        new ParallelCommandGroup(new PositionTurret(turret, turretAngle), new PositionTilt(tilt, tiltTurns),
+        new ParallelCommandGroup(new PositionTurretToAngle(turret, turretAngle), new PositionTilt(tilt, tiltTurns),
             s_trajectory.getRamsete(s_trajectory.trenchStartOne).andThen(() -> drive.tankDriveVolts(0, 0))),
 
         new ParallelCommandGroup(new PositionTiltandLock(tilt, limelight, tiltTurns),
@@ -80,7 +80,7 @@ public class AutoTrenchStart extends SequentialCommandGroup {
         new ParallelCommandGroup(new ShootCells(shooter, transport, compressor, shootSpeed, shootTime)
             .deadlineWith(new ParallelCommandGroup(new PositionHoldTilt(tilt)), new PositionHoldTurret(turret))),
 
-        new ParallelCommandGroup(new PositionTurret(turret, turretAngle), new PositionTilt(tilt, tiltTurns),
+        new ParallelCommandGroup(new PositionTurretToAngle(turret, turretAngle), new PositionTilt(tilt, tiltTurns),
             s_trajectory.getRamsete(s_trajectory.trenchStartTwo).andThen(() -> drive.tankDriveVolts(0, 0))),
         new StopRearIntake(rearIntake),
 
@@ -90,7 +90,7 @@ public class AutoTrenchStart extends SequentialCommandGroup {
         new ParallelCommandGroup(new ShootCells(shooter, transport, compressor, shootSpeed, shootTime1)
             .deadlineWith(new ParallelCommandGroup(new PositionHoldTilt(tilt)), new PositionHoldTurret(turret))),
 
-        new ParallelCommandGroup(new PositionTilt(tilt, -1), new PositionTurret(turret, 0)));
+        new ParallelCommandGroup(new PositionTilt(tilt, -1), new PositionTurretToAngle(turret, 0)));
 
   }
 }

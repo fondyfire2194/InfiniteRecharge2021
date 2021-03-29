@@ -56,7 +56,7 @@ public class LockTiltOnTarget extends CommandBase {
   public void execute() {
 
     autoLookForTarget = DriverStation.getInstance().isAutonomous()
-        && Math.abs(tilt.positionCommandTurns - tilt.getTiltPosition()) < 2
+        && Math.abs(tilt.positionCommandTurns - tilt.getTiltPositionDegrees()) < 2
         && Math.abs(limelight.getdegVerticalToTarget()) < 12.;
 
     teleopLookForTarget = DriverStation.getInstance().isOperatorControl()
@@ -78,7 +78,7 @@ public class LockTiltOnTarget extends CommandBase {
      * 
      */
     if (!targetAvailable && targetWasSeen) {
-      tilt.positionCommandTurns = tilt.getTiltPosition();
+      tilt.positionCommandTurns = tilt.getTiltPositionDegrees();
       targetWasSeen = false;
     }
 
@@ -94,12 +94,12 @@ public class LockTiltOnTarget extends CommandBase {
       if (goPlus ^ goMinus)
         goPlus = true;
 
-      if (goMinus && tilt.getTiltPosition() < HoodedShooterConstants.TILT_MIN_TURNS + 1) {
+      if (goMinus && tilt.getTiltPositionDegrees() < HoodedShooterConstants.TILT_MIN_TURNS + 1) {
         goPlus = true;
         goMinus = false;
         tilt.positionCommandTurns = HoodedShooterConstants.TILT_MAX_TURNS - 1;
       }
-      if (goPlus && tilt.getTiltPosition() > HoodedShooterConstants.TILT_MAX_TURNS - 1) {
+      if (goPlus && tilt.getTiltPositionDegrees() > HoodedShooterConstants.TILT_MAX_TURNS - 1) {
         goMinus = true;
         goPlus = false;
         tilt.positionCommandTurns = HoodedShooterConstants.TILT_MIN_TURNS + 1;
@@ -113,7 +113,7 @@ public class LockTiltOnTarget extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    tilt.positionCommandTurns = tilt.getTiltPosition();
+    tilt.positionCommandTurns = tilt.getTiltPositionDegrees();
     // limelight.setSnapshot(Snapshot.koff);
   }
 

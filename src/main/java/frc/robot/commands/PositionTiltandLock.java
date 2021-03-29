@@ -73,7 +73,7 @@ public class PositionTiltandLock extends CommandBase {
       targetSeen++;
     else
       targetSeen = 0;
-    if (tilt.getTiltPosition() < 1 || !limelight.getIsTargetFound()) {
+    if (tilt.getTiltPositionDegrees() < 1 || !limelight.getIsTargetFound()) {
       tilt.positionTilttoTurns(turns);
     } else {
       tilt.lockTiltToVision(limelight.getdegVerticalToTarget());
@@ -90,14 +90,14 @@ public class PositionTiltandLock extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     SmartDashboard.putBoolean("CMDTIALRng", false);
-    double lasttPosition = tilt.getTiltPosition();
+    double lasttPosition = tilt.getTiltPositionDegrees();
     tilt.positionCommandTurns = lasttPosition;
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return tilt.getTiltPosition() > 1 && onTarget >= 2
+    return tilt.getTiltPositionDegrees() > 1 && onTarget >= 2
         || Robot.isSimulation() && Timer.getFPGATimestamp() > simStartTime + 2;
   }
 }

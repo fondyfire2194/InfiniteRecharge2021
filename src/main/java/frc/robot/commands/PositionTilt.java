@@ -50,7 +50,7 @@ public class PositionTilt extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(turns - tilt.getTiltPosition()) < 1.5 && tilt.getTiltSpeed() < .25
+    return Math.abs(turns - tilt.getTiltPositionDegrees()) < 1.5 && tilt.getTiltSpeed() < .25
         || tilt.m_reverseLimit.get() && tilt.getTiltOut() <= 0
         || Robot.isSimulation() && Timer.getFPGATimestamp() > simStartTime + 2;
 

@@ -40,9 +40,10 @@ import frc.robot.commands.LockTurretOnTarget;
 import frc.robot.commands.LogDistanceData;
 import frc.robot.commands.LogTrajData;
 import frc.robot.commands.PositionHoldTilt;
+import frc.robot.commands.PositionHoldTurret;
 import frc.robot.commands.PositionTilt;
 import frc.robot.commands.PositionTiltandLock;
-import frc.robot.commands.PositionTurret;
+import frc.robot.commands.PositionTurretToAngle;
 import frc.robot.commands.PositionTurretandLock;
 import frc.robot.commands.ResetEncoders;
 import frc.robot.commands.ResetGyro;
@@ -56,7 +57,9 @@ import frc.robot.commands.StartShooter;
 import frc.robot.commands.StopShoot;
 import frc.robot.commands.TiltFindTarget;
 import frc.robot.commands.ToggleDriverCam;
+import frc.robot.subsystems.CellHopperBelts;
 import frc.robot.subsystems.CellTransportSubsystem;
+import frc.robot.subsystems.ControlPanelSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.HoodedShooterSubsystem;
 import frc.robot.subsystems.RearIntakeSubsystem;
@@ -84,19 +87,17 @@ public class RobotContainer {
 
       public final ShooterTiltSubsystem m_tilt;
 
-      // public final ControlPanelSubsystem m_controlPanel;
-
-      public final HoodedShooterSubsystem m_shooter;
+      public final ControlPanelSubsystem m_controlPanel;
 
       public final CellTransportSubsystem m_transport;
+
+      public final HoodedShooterSubsystem m_shooter;
 
       public final RearIntakeSubsystem m_rearIntake;
 
       public final PowerDistributionPanel m_powerDistributionPanel;
 
       public final Compressor m_compressor;
-
-      public CANChecker canChecker;
 
       // The driver's controller
       private final Joystick m_driverController = new Joystick(OIConstants.kDriverControllerPort);
@@ -128,6 +129,8 @@ public class RobotContainer {
             SmartDashboard.putData("Turret", m_turret);
             m_tilt = new ShooterTiltSubsystem();
             SmartDashboard.putData("Tilt", m_tilt);
+            m_transport = new CellTransportSubsystem();
+            SmartDashboard.putData("Celltransport", m_transport);
 
             m_limelight = new LimeLight();
             m_limelight.setStream(StreamType.kPiPSecondary);
@@ -135,25 +138,14 @@ public class RobotContainer {
             m_limelightRear = new LimeLight("limelight-rear");
             m_limelightRear.setStream(StreamType.kPiPSecondary);
             m_limelightRear.setPipeline(0);
-            // m_controlPanel = new ControlPanelSubsystem();
+            m_controlPanel = new ControlPanelSubsystem();
 
             m_shooter = new HoodedShooterSubsystem();
 
             m_rearIntake = new RearIntakeSubsystem();
             m_compressor = new Compressor();
             m_powerDistributionPanel = new PowerDistributionPanel(Constants.PDP);
-            m_transport = new CellTransportSubsystem();
-            // if (Robot.isReal()) {
-            //       canChecker = new CANChecker();
-            //       canChecker.addTalons(m_rearIntake.intakeTalons);
-            //       canChecker.addTalons(m_transport.transportTalons);
 
-            //       canChecker.addSparkMax(m_robotDrive.motor);
-            //       canChecker.addSparkMaxID(m_robotDrive.sparkMaxID);
-
-            //       canChecker.addSparkMax(m_shooter.motor);
-            //       canChecker.addSparkMaxID(m_shooter.sparkMaxID);
-            // }
             new AutoSwitchZoom(m_limelight, m_tilt, m_turret, m_shooter).schedule();
 
             // // //Configure the button bindings
@@ -176,9 +168,9 @@ public class RobotContainer {
             SmartDashboard.putData("TiltLockTo5", new PositionTiltandLock(m_tilt, m_limelight, 5.5));
             SmartDashboard.putData("TiltLockTo1.5)", new PositionTiltandLock(m_tilt, m_limelight, 1.));
 
-            SmartDashboard.putData("TurretTo +10", new PositionTurret(m_turret, 10));// degrees
-            SmartDashboard.putData("TurretTo -10", new PositionTurret(m_turret, -10));// degrees
-            SmartDashboard.putData("TurretTo +0", new PositionTurret(m_turret, 0));// degrees
+            SmartDashboard.putData("TurretTo +10", new PositionTurretToAngle(m_turret, 10));// degrees
+            SmartDashboard.putData("TurretTo -10", new PositionTurretToAngle(m_turret, -10));// degrees
+            SmartDashboard.putData("TurretTo +0", new PositionTurretToAngle(m_turret, 0));// degrees
 
             SmartDashboard.putData("TurretLockTo +6", new PositionTurretandLock(m_turret, m_limelight, 6));// degrees
             SmartDashboard.putData("TurretLockTo -6", new PositionTurretandLock(m_turret, m_limelight, -6));// degrees
@@ -265,7 +257,7 @@ public class RobotContainer {
             m_shooter.setDefaultCommand(
                         new RunCommand(() -> m_shooter.jogShooter(gamepad.getX(Hand.kLeft) / 5), m_shooter));
 
-            m_turret.setDefaultCommand(new RunCommand(() -> m_turret.positionTurretToTurns(), m_turret));
+            m_turret.setDefaultCommand(new PositionHoldTurret(m_turret));
 
             // m_turret.setDefaultCommand(new LockTurretOnTarget(m_turret, m_limelight));
 
@@ -273,7 +265,7 @@ public class RobotContainer {
 
             // m_tilt.setDefaultCommand(new LockTiltOnTarget(m_tilt, m_limelight));
 
-            new RunCommand(() -> m_transport.runBeltMotor(setupGamepad.getX(Hand.kLeft) / 2), m_transport);
+            new RunCommand(() -> m_transport.runLeftBeltMotor(setupGamepad.getX(Hand.kLeft) / 2), m_transport);
       }
 
       /**
@@ -331,11 +323,11 @@ public class RobotContainer {
                         .whenPressed(() -> m_rearIntake.runIntakeMotor(IntakeConstants.REAR_SPEED))
                         .whenPressed(() -> m_transport.runFrontRollerMotor(CellTransportConstants.FRONT_SHOOT_SPEED))
                         .whenPressed(() -> m_transport.runRearRollerMotor(-CellTransportConstants.REAR_SHOOT_SPEED))
-                        .whenPressed(() -> m_transport.runBeltMotor(CellTransportConstants.BELT_SPEED))
+                        .whenPressed(() -> m_transport.runLeftBeltMotor(CellTransportConstants.BELT_SPEED))
                         .whenReleased(() -> m_rearIntake.runIntakeMotor(0.))
                         .whenReleased(() -> m_transport.runFrontRollerMotor(0.))
                         .whenReleased(() -> m_transport.runRearRollerMotor(0.))
-                        .whenReleased(() -> m_transport.runBeltMotor(0.));
+                        .whenReleased(() -> m_transport.runLeftBeltMotor(0.));
 
             new JoystickButton(setupGamepad, Button.kBumperLeft.value).whileHeld(new StartEndCommand(
                         () -> m_shooter.jogShooter(.05), () -> m_shooter.jogShooter(0.), m_shooter));

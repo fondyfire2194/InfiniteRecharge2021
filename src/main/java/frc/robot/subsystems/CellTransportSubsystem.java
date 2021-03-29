@@ -24,7 +24,8 @@ public class CellTransportSubsystem extends SubsystemBase {
   /**
    * Creates a new CellTransport.
    */
-  private final TalonSRX beltMotor = new TalonSRX(CellTransportConstants.BELT_MOTOR);
+  private final TalonSRX leftBeltMotor = new TalonSRX(CellTransportConstants.LEFT_BELT_MOTOR);
+  private final TalonSRX rightBeltMotor = new TalonSRX(CellTransportConstants.RIGHT_BELT_MOTOR);
   private final TalonSRX frontRollerMotor = new TalonSRX(CellTransportConstants.FRONT_ROLLER);
   private final TalonSRX rearRollerMotor = new TalonSRX(CellTransportConstants.REAR_ROLLER);
 
@@ -36,13 +37,10 @@ public class CellTransportSubsystem extends SubsystemBase {
   private double beltPulseStartTime;
 
   public CellTransportSubsystem() {
-    beltMotor.configFactoryDefault();
+    leftBeltMotor.configFactoryDefault();
+    rightBeltMotor.configFactoryDefault(); 
     frontRollerMotor.configFactoryDefault();
     rearRollerMotor.configFactoryDefault();
-
-    // transportTalons.add(beltMotor);
-    // transportTalons.add(frontRollerMotor);
-    // transportTalons.add(rearRollerMotor);
 
     setFrontRollerBrakeOn(true);
     setRearRollerBrakeOn(true);
@@ -57,8 +55,12 @@ public class CellTransportSubsystem extends SubsystemBase {
 
   }
 
-  public void runBeltMotor(double speed) {
-    beltMotor.set(ControlMode.PercentOutput, speed);
+  public void runLeftBeltMotor(double speed) {
+    leftBeltMotor.set(ControlMode.PercentOutput, speed);
+  }
+
+  public void runRightBeltMotor(double speed) {
+    leftBeltMotor.set(ControlMode.PercentOutput, speed);
   }
 
   public void pulseBelt(double speed, double onTime, double offTime) {
@@ -66,12 +68,12 @@ public class CellTransportSubsystem extends SubsystemBase {
       beltPulseStartTime = Timer.getFPGATimestamp();
 
     if (Timer.getFPGATimestamp() < beltPulseStartTime + onTime) {
-      runBeltMotor(-speed);
+      runLeftBeltMotor(-speed);
     }
 
     if (Timer.getFPGATimestamp() > beltPulseStartTime + onTime
         && Timer.getFPGATimestamp() < beltPulseStartTime + onTime + offTime) {
-      runBeltMotor(0);
+      runLeftBeltMotor(0);
     }
 
     if (Timer.getFPGATimestamp() > beltPulseStartTime + onTime + offTime) {
@@ -82,9 +84,11 @@ public class CellTransportSubsystem extends SubsystemBase {
 
   public void setBeltBrakeOn(boolean on) {
     if (on) {
-      beltMotor.setNeutralMode(NeutralMode.Brake);
+      leftBeltMotor.setNeutralMode(NeutralMode.Brake);
+      rightBeltMotor.setNeutralMode(NeutralMode.Brake);     
     } else {
-      beltMotor.setNeutralMode(NeutralMode.Coast);
+      leftBeltMotor.setNeutralMode(NeutralMode.Coast);
+      rightBeltMotor.setNeutralMode(NeutralMode.Coast);  
     }
   }
 

@@ -23,7 +23,7 @@ public class PositionTurretandLock extends CommandBase {
   private final ShooterTurretSubsystem turret;
   private final LimeLight limelight;
 
-  private final double angle;
+  private double angle;
   private double turns;
   private double simStartTime;
   private int onTarget;
@@ -39,13 +39,12 @@ public class PositionTurretandLock extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    turns = angle / HoodedShooterConstants.TURRET_ENCODER_DEG_PER_REV;
-    if (turns > HoodedShooterConstants.TURRET_MAX_TURNS)
-      turns = HoodedShooterConstants.TURRET_MAX_TURNS;
-    if (turns < HoodedShooterConstants.TURRET_MIN_TURNS)
-      turns = HoodedShooterConstants.TURRET_MIN_TURNS;
+
+    if (angle > HoodedShooterConstants.TURRET_MAX_ANGLE)
+      angle = HoodedShooterConstants.TURRET_MAX_ANGLE;
+    if (angle < HoodedShooterConstants.TURRET_MIN_ANGLE)
+      angle = HoodedShooterConstants.TURRET_MIN_ANGLE;
     SmartDashboard.putBoolean("CMDTUALRng", true);
-    turret.commandTurns = turns;
     simStartTime = Timer.getFPGATimestamp();
     onTarget = 0;
   }
@@ -55,7 +54,7 @@ public class PositionTurretandLock extends CommandBase {
   public void execute() {
 
     if (!limelight.getIsTargetFound()) {
-      turret.positionTurretToTurns();
+      turret.positionTurretToAngle(angle);
 
     } else {
       turret.lockTurretToVision(limelight.getdegRotationToTarget());
@@ -69,13 +68,13 @@ public class PositionTurretandLock extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     SmartDashboard.putBoolean("CMDTUALRng", false);
-    turret.commandTurns = turret.getTurretPosition();
+    turret.commandAngle = turret.getTurretAngle();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
 
-    return onTarget > 2 || Robot.isSimulation() && Timer.getFPGATimestamp() > simStartTime + 2;
+    return onTarget > 2;
   }
 }

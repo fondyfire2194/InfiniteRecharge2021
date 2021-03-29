@@ -16,23 +16,26 @@ public class PositionHoldTurret extends CommandBase {
    */
 
   private final ShooterTurretSubsystem turret;
+  private double angle;
 
   public PositionHoldTurret(ShooterTurretSubsystem turret) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.turret = turret;
+
     addRequirements(turret);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    turret.setPIDParameters();
+    angle = turret.getTurretAngle();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    turret.positionTurretToTurns();
+    turret.positionTurretToAngle(angle);
   }
 
   // Called once the command ends or is interrupted.
