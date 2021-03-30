@@ -6,19 +6,20 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ShooterTiltSubsystem;
+import frc.robot.subsystems.ShooterTurretSubsystem;
 
-public class PositionTilt extends CommandBase {
+public class PositionTurret extends CommandBase {
   /** Creates a new PositionTilt. */
 
-  private final ShooterTiltSubsystem m_tilt;
+  private final ShooterTurretSubsystem m_turret;
 
   private double m_position;
 
   private double m_endpoint;
 
-  public PositionTilt(ShooterTiltSubsystem tilt, double position) {
+  public PositionTurret(ShooterTurretSubsystem turret, double position) {
     // Use addRequirements() here to declare subsystem dependencies.
-    m_tilt = tilt;
+    m_turret = turret;
     m_position = position;
   }
 
@@ -31,7 +32,7 @@ public class PositionTilt extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_tilt.motionMagic(m_endpoint);
+    m_turret.motionMagic(m_endpoint);
   }
 
   // Called once the command ends or is interrupted.

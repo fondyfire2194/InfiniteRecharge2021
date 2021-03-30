@@ -31,11 +31,8 @@ public class LoadCells extends CommandBase {
   @Override
   public void execute() {
 
-    if (!transport.powerCellAtIntake.get())
-      transport.runLeftBeltMotor(.25);
-    else
-      transport.runLeftBeltMotor(0);
-    ;
+    transport.runLeftBeltMotor(.25);
+
   }
 
   // Called once the command ends or is interrupted.

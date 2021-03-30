@@ -23,6 +23,8 @@ import edu.wpi.first.wpilibj.util.Units;
 public final class Constants {
 
    public static final int PDP = 1;
+public static final double TURRET_POSITION_RATE = 1;
+public static final double TILT_POSITION_RATE = 1;
 
    public static final class DriveConstants {
 
@@ -89,10 +91,14 @@ public final class Constants {
       public static final int LEFT_MOTOR = 10;
       public static final int RIGHT_MOTOR = 11;
       public static final int ROTATE_MOTOR = 12;
+
+      //tilt
       public static final int TILT_MOTOR = 13;
       public static final double MAX_SPEED = 5500.;
       public static final double MIN_SPEED = 1500.;
       public static final double SPEED_INCREMENT = 250.;
+
+      //turret
 
       public static final double TURRET_MAX_ANGLE = 100;
       public static final double TURRET_MIN_ANGLE = -100;

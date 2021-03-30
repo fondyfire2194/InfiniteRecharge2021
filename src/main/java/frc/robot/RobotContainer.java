@@ -31,19 +31,13 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.LimelightControlMode.StreamType;
 import frc.robot.commands.AutoSwitchZoom;
 import frc.robot.commands.EndLogData;
+import frc.robot.commands.HoldTiltPositionMotionMagic;
+import frc.robot.commands.HoldTurretPositionMotionMagic;
 import frc.robot.commands.LockTiltOnTarget;
-import frc.robot.commands.LockTurretOnTarget;
 import frc.robot.commands.LogDistanceData;
 import frc.robot.commands.LogTrajData;
-<<<<<<< HEAD
-import frc.robot.commands.PositionHoldTilt;
-import frc.robot.commands.PositionHoldTurret;
-=======
->>>>>>> 93a7034312cb42978aaaec409f75d2b4304861b1
 import frc.robot.commands.PositionTilt;
-import frc.robot.commands.PositionTiltandLock;
-import frc.robot.commands.PositionTurretToAngle;
-import frc.robot.commands.PositionTurretandLock;
+import frc.robot.commands.PositionTurret;
 import frc.robot.commands.ResetEncoders;
 import frc.robot.commands.ResetGyro;
 import frc.robot.commands.ResetPose;
@@ -56,7 +50,6 @@ import frc.robot.commands.StartShooter;
 import frc.robot.commands.StopShoot;
 import frc.robot.commands.TiltFindTarget;
 import frc.robot.commands.ToggleDriverCam;
-import frc.robot.subsystems.CellHopperBelts;
 import frc.robot.subsystems.CellTransportSubsystem;
 import frc.robot.subsystems.ControlPanelSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -79,8 +72,6 @@ public class RobotContainer {
       final DriveSubsystem m_robotDrive;
 
       public final LimeLight m_limelight;
-
-      public final LimeLight m_limelightRear;
 
       public final ShooterTurretSubsystem m_turret;
 
@@ -134,9 +125,7 @@ public class RobotContainer {
             m_limelight = new LimeLight();
             m_limelight.setStream(StreamType.kPiPSecondary);
             m_limelight.setPipeline(0);
-            m_limelightRear = new LimeLight("limelight-rear");
-            m_limelightRear.setStream(StreamType.kPiPSecondary);
-            m_limelightRear.setPipeline(0);
+
             m_controlPanel = new ControlPanelSubsystem();
 
             m_shooter = new HoodedShooterSubsystem();
@@ -158,23 +147,18 @@ public class RobotContainer {
             SmartDashboard.putData(new ResetShooterAngle(m_turret));
             SmartDashboard.putData(new ResetShooterTilt(m_tilt));
             SmartDashboard.putData(new ShootCells(m_shooter, m_transport, m_compressor, 3000, 0));
-            SmartDashboard.putData(new LockTurretOnTarget(m_turret, m_limelight));
+
             SmartDashboard.putData(new LockTiltOnTarget(m_tilt, m_limelight));
 
             SmartDashboard.putData("TiltTo5", new PositionTilt(m_tilt, 4));
             SmartDashboard.putData("TiltTo)", new PositionTilt(m_tilt, -1.5));
 
-            SmartDashboard.putData("TiltLockTo5", new PositionTiltandLock(m_tilt, m_limelight, 5.5));
-            SmartDashboard.putData("TiltLockTo1.5)", new PositionTiltandLock(m_tilt, m_limelight, 1.));
+ 
+            SmartDashboard.putData("TurretTo +10", new PositionTurret(m_turret, 10));// degrees
+            SmartDashboard.putData("TurretTo -10", new PositionTurret(m_turret, -10));// degrees
+            SmartDashboard.putData("TurretTo +0", new PositionTurret(m_turret, 0));// degrees
 
-            SmartDashboard.putData("TurretTo +10", new PositionTurretToAngle(m_turret, 10));// degrees
-            SmartDashboard.putData("TurretTo -10", new PositionTurretToAngle(m_turret, -10));// degrees
-            SmartDashboard.putData("TurretTo +0", new PositionTurretToAngle(m_turret, 0));// degrees
-
-            SmartDashboard.putData("TurretLockTo +6", new PositionTurretandLock(m_turret, m_limelight, 6));// degrees
-            SmartDashboard.putData("TurretLockTo -6", new PositionTurretandLock(m_turret, m_limelight, -6));// degrees
-            SmartDashboard.putData("TurretLockTo +0", new PositionTurretandLock(m_turret, m_limelight, 0));// degrees
-
+ 
             SmartDashboard.putData("LogData", new LogDistanceData(m_robotDrive, m_turret, m_tilt, m_limelight));
             SmartDashboard.putData("EndLogData", new EndLogData(m_robotDrive));
 
@@ -209,34 +193,6 @@ public class RobotContainer {
             // CameraServer.getInstance().addCamera(httpCamera);
             // Shuffleboard.getTab("cameraTab").add(httpCamera);
 
-            // Rear Camera
-
-            // ShuffleboardTab rearCameraTab = Shuffleboard.getTab("VisionRear");
-
-            // rearCameraTab.add("No RZoom", new InstantCommand(() ->
-            // m_limelightRear.setPipeline(0)));
-            // rearCameraTab.add("2X RZoom", new InstantCommand(() ->
-            // m_limelightRear.setPipeline(1)));
-            // rearCameraTab.add("3X RZoom", new InstantCommand(() ->
-            // m_limelightRear.setPipeline(2)));
-            // rearCameraTab.add("RCamtran", new InstantCommand(() ->
-            // m_limelightRear.setPipeline(9)));
-            // rearCameraTab.add("RDriverCam", new InstantCommand(() ->
-
-            // m_limelightRear.setCamMode(LimelightControlMode.CamMode.kdriver)));
-            // rearCameraTab.add("TargetCam",
-            // new InstantCommand(() ->
-            // m_limelightRear.setCamMode(LimelightControlMode.CamMode.kvision)));
-            // rearCameraTab.add("RLEDsOn",
-            // new InstantCommand(() ->
-            // m_limelightRear.setLEDMode(LimelightControlMode.LedMode.kforceOn)));
-            // rearCameraTab.add("RLEDsOff",
-            // new InstantCommand(() ->
-            // m_limelightRear.setLEDMode(LimelightControlMode.LedMode.kforceOff)));
-            // rearCameraTab.add("RLEDsPipe",
-            // new InstantCommand(() ->
-            // m_limelightRear.setLEDMode(LimelightControlMode.LedMode.kpipeLine)));
-
             // Configure default commands
             // Set the default drive command to joystick arcade drive
 
@@ -249,20 +205,17 @@ public class RobotContainer {
                         new RunCommand(() -> m_robotDrive.arcadeDrive(-m_driverController.getY(),
                                     m_driverController.getTwist() / 3), m_robotDrive));
 
-            // m_controlPanel.setDefaultCommand(new RunCommand(
-            // () -> m_controlPanel.turnWheelMotor(setupGamepad.getY(Hand.kLeft) / 5),
-            // m_controlPanel));
+            m_controlPanel.setDefaultCommand(new RunCommand(
+                        () -> m_controlPanel.turnWheelMotor(setupGamepad.getY(Hand.kLeft) / 5), m_controlPanel));
 
             m_shooter.setDefaultCommand(
                         new RunCommand(() -> m_shooter.jogShooter(gamepad.getX(Hand.kLeft) / 5), m_shooter));
 
-            m_turret.setDefaultCommand(new PositionHoldTurret(m_turret));
+            m_turret.setDefaultCommand(new HoldTurretPositionMotionMagic(m_turret));
 
-            // m_turret.setDefaultCommand(new LockTurretOnTarget(m_turret, m_limelight));
+            m_tilt.setDefaultCommand(new HoldTiltPositionMotionMagic(m_tilt));    
 
-            m_tilt.setDefaultCommand(new RunCommand(() -> m_tilt.positionTilttoTurns(), m_tilt));
 
-            // m_tilt.setDefaultCommand(new LockTiltOnTarget(m_tilt, m_limelight));
 
             new RunCommand(() -> m_transport.runLeftBeltMotor(setupGamepad.getX(Hand.kLeft) / 2), m_transport);
       }

@@ -73,11 +73,11 @@ public class PositionTiltandLock extends CommandBase {
       targetSeen++;
     else
       targetSeen = 0;
-    if (tilt.getTiltPositionDegrees() < 1 || !limelight.getIsTargetFound()) {
-      tilt.positionTilttoTurns(turns);
-    } else {
-      tilt.lockTiltToVision(limelight.getdegVerticalToTarget());
-    }
+    // if (tilt.getTiltPositionDegrees() < 1 || !limelight.getIsTargetFound()) {
+    //   tilt.positionTiltToTurns(turns);
+    // } else {
+    //   tilt.lockTiltToVision(limelight.getdegVerticalToTarget());
+    // }
     if (limelight.getVertOnTarget())
       onTarget++;
     else

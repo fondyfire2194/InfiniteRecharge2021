@@ -10,8 +10,6 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.LimeLight;
-import frc.robot.Robot;
-import frc.robot.subsystems.ShooterTiltSubsystem;
 import frc.robot.subsystems.ShooterTurretSubsystem;
 
 public class TurretFindTarget extends CommandBase {
@@ -57,14 +55,14 @@ public class TurretFindTarget extends CommandBase {
     if (goPlus)
       jogSpeed = .05;
 
-    if (goMinus && turret.getTurretEncoderRevs() < -100) {
-      goPlus = true;
-      goMinus = false;
-    }
-    if (goPlus && turret.getTurretEncoderRevs() > 100) {
-      goMinus = true;
-      goPlus = false;
-    }
+    // if (goMinus && turret.getTurretEncoderRevs() < -100) {
+    //   goPlus = true;
+    //   goMinus = false;
+    // }
+    // if (goPlus && turret.getTurretEncoderRevs() > 100) {
+    //   goMinus = true;
+    //   goPlus = false;
+    // }
     turret.jogTurret(jogSpeed);
   }
 

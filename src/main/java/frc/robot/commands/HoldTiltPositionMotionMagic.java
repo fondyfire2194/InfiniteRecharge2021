@@ -54,7 +54,7 @@ public class HoldTiltPositionMotionMagic extends CommandBase {
 	public void execute() {
 
 		if (m_tilt.holdPositionDegrees != lastHoldPositionDegrees) {
-//			m_tilt.magicMotionTilt(m_tilt.holdPositionDegrees, Constants.ELEVATOR_POSITION_RATE);
+			m_tilt.motionMagic(m_tilt.holdPositionDegrees);
 			lastHoldPositionDegrees = m_tilt.holdPositionDegrees;
 		}
 	}

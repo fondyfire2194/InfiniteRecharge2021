@@ -26,8 +26,6 @@ public class LockTiltOnTarget extends CommandBase {
   private boolean goPlus;
   private boolean goMinus;
 
-  private double jogSpeed;
-
   public LockTiltOnTarget(ShooterTiltSubsystem tilt, LimeLight limelight) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.tilt = tilt;
@@ -70,7 +68,7 @@ public class LockTiltOnTarget extends CommandBase {
       targetWasSeen = true;
       // limelight.setSnapshot(Snapshot.kon);
 
-      tilt.lockTiltToVision(limelight.getdegVerticalToTarget());
+ //     tilt.lockTiltToVision(limelight.getdegVerticalToTarget());
 
     }
     /**
@@ -83,7 +81,7 @@ public class LockTiltOnTarget extends CommandBase {
     }
 
     if (!targetAvailable && !targetWasSeen) {
-      tilt.positionTilttoTurns();
+      // tilt.positionTiltToTurns();
     }
     /**
      * Looking for target triggered by driver in teleop only Driver needs to point
@@ -105,7 +103,7 @@ public class LockTiltOnTarget extends CommandBase {
         tilt.positionCommandTurns = HoodedShooterConstants.TILT_MIN_TURNS + 1;
       }
 
-      tilt.positionTilttoTurns();
+  //    tilt.positionTiltToTurns();
     }
 
   }

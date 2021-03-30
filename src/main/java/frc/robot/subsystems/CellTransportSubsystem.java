@@ -11,12 +11,10 @@ import java.util.List;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.BaseTalon;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CellTransportConstants;
 
@@ -31,9 +29,7 @@ public class CellTransportSubsystem extends SubsystemBase {
 
   public List<BaseTalon> transportTalons;
 
-  public DigitalInput powerCellAtIntake = new DigitalInput(0);
-  public DigitalInput powerCellAtFront = new DigitalInput(1);
-
+  
   private double beltPulseStartTime;
 
   public CellTransportSubsystem() {
@@ -51,7 +47,7 @@ public class CellTransportSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putBoolean("CellAtIntake", !powerCellAtIntake.get());
+    
 
   }
 
