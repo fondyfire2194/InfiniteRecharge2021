@@ -29,10 +29,9 @@ public class ShooterTiltSubsystem extends SubsystemBase {
    private static final int TALON_TIMEOUT_MS = 20;
    private double encoderCountsPerRev = 4096;
    private double degreesPerEncoderRev = .00295; // HoodedShooterConstants.TURRET_ENCODER_DEG_PER_REV
-   private double encoderCountsPerDegree = encoderCountsPerRev * degreesPerEncoderRev; // 4096 * .00295 = 12.0832
+   public double encoderCountsPerDegree = encoderCountsPerRev * degreesPerEncoderRev; // 4096 * .00295 = 12.0832
  
-   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM, maxVel, minVel, maxAcc, allowedErr;
-
+ 
    public double requiredTiltAngle;
 
    // public double commandTurns;
@@ -52,7 +51,8 @@ public class ShooterTiltSubsystem extends SubsystemBase {
 
    public DigitalInput m_reverseLimit = new DigitalInput(6);
    private double tiltTargetPosition;
-   public double m_tiltVisionCorrection;
+   public double visionCorrection;
+
 
    public ShooterTiltSubsystem() {
       m_tiltMotor.set(ControlMode.PercentOutput, 0);
@@ -116,7 +116,6 @@ public class ShooterTiltSubsystem extends SubsystemBase {
          displaySelect = 0;
 
          SmartDashboard.putNumber("TiltPosn", getTiltPositionDegrees());
-         SmartDashboard.putNumber("Tilt Angle", getTiltAngle());
          SmartDashboard.putNumber("Tilt OUT", getTiltOut());
          SmartDashboard.putNumber("Tilt Amps", m_tiltMotor.getStatorCurrent());
          SmartDashboard.putBoolean("Tilt Down R LS", m_reverseLimit.get());
@@ -132,10 +131,10 @@ public class ShooterTiltSubsystem extends SubsystemBase {
    }
 
    public void jogTilt(double speed) {
-      /
+      
       SmartDashboard.putString("TiltState", "Jogging");
 
-      m_tiltMotor.set(speed);
+      m_tiltMotor.set(ControlMode.PercentOutput,speed);
    }
 
    public void motionMagic(double position) {
@@ -145,10 +144,6 @@ public class ShooterTiltSubsystem extends SubsystemBase {
 
    public double getTiltOut() {
       return m_tiltMotor.get();
-   }
-
-   public double getTiltAngle() {
-      return 0;// m_tiltEncoder.getDistance();
    }
 
    public boolean getTiltInPosition() {

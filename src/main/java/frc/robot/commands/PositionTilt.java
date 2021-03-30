@@ -16,16 +16,24 @@ public class PositionTilt extends CommandBase {
 
   private double m_endpoint;
 
+  public PositionTilt(ShooterTiltSubsystem tilt) {
+    m_tilt = tilt;
+    m_endpoint = m_tilt.getTiltPositionDegrees();
+    addRequirements(m_tilt);
+  }
+
   public PositionTilt(ShooterTiltSubsystem tilt, double position) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_tilt = tilt;
     m_position = position;
+    addRequirements(m_tilt);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_endpoint = m_position *8888;
+    m_endpoint = m_position * m_tilt.encoderCountsPerDegree;
+    m_tilt.visionCorrection=0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.

@@ -107,9 +107,13 @@ public static final double TILT_POSITION_RATE = 1;
        * 100 output revs of turret gearbox turns an 18 tooth pinion one time There are
        * 222 teeth in 360 degrees, so 1 tooth = 360/220 = 1.64 degrees So 18 teeth
        * (100 revs) = 18 * 1.64 = 29.5 degrees and one gearbox output rev is .295
-       * degrees With a 100:1 gearbox that makes 1 motor / encoder rev = .00295degrees
+       * degrees With a 100:1 gearbox that makes 1 motor encoder rev = .00295degrees
+       * 29.5 degrees is 4096 *100 counts 1 degree is 13847.458 count
        */
-      public static final double TURRET_ENCODER_DEG_PER_REV = .00295;
+      public static final double TURRET_ENCODER_DEG_PER_TURRET_REV = .00295;
+      public static final double TURRET_ENCODER_COUNTS_PER_REV  = 4096;
+      public static final double TURRET_ENCODER_COUNTS_PER_TURRET_DEGREE = 138847;//.4096/.0295;
+      
 
       public static final double TILT_DEG_PER_ENCODER_REV = .029;
       public static final double TILT_MIN_TURNS = 0;

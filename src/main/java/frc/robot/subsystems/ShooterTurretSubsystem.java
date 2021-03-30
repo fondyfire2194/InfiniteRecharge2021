@@ -48,7 +48,7 @@ public class ShooterTurretSubsystem extends SubsystemBase {
    public boolean changeLocked;
    private double encoderCountsPerRev = 4096;
    private double degreesPerEncoderRev = .00295; // HoodedShooterConstants.TURRET_ENCODER_DEG_PER_REV
-   private double encoderCountsPerDegree = encoderCountsPerRev * degreesPerEncoderRev; // 4096 * .00295 = 12.0832
+   public double encoderCountsPerDegree = encoderCountsPerRev / degreesPerEncoderRev; // 4096 / .00295 = 13884.458
    public double positionCommandAngle;
    public double holdPositionDegrees;
 
@@ -59,7 +59,7 @@ public class ShooterTurretSubsystem extends SubsystemBase {
    static final double TICK_THRESH = TALON_TICK_THRESH * 4;
    public static final double TICK_PER_100MS_THRESH = 64; // about a tenth of a rotation per second
    static final int PRIMARY_PID_LOOP = 0;
-   public double m_turretVisionCorrection;
+   public double visionCorrection;
 
    public ShooterTurretSubsystem() {
       m_rotateMotor.set(ControlMode.PercentOutput, 0);
@@ -121,10 +121,10 @@ public class ShooterTurretSubsystem extends SubsystemBase {
 
    }
 
-   public void motionMagic(double position) {
-      double correctedPosition = position + m_turretVisionCorrection;
-      correctedPosition *= encoderCountsPerDegree;
-      m_rotateMotor.set(ControlMode.MotionMagic, correctedPosition);
+   public void motionMagic(double angle) {
+      double correctedAngle = angle + visionCorrection;
+      correctedAngle *= encoderCountsPerDegree;
+      m_rotateMotor.set(ControlMode.MotionMagic, correctedAngle);
    }
 
    public double getTurretOut() {

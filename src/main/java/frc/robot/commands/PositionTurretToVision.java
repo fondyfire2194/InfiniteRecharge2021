@@ -8,28 +8,21 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.LimeLight;
 import frc.robot.subsystems.ShooterTurretSubsystem;
 
-public class PositionTurret extends CommandBase {
+public class PositionTurretToVision extends CommandBase {
   /** Creates a new PositionTilt. */
 
   private final ShooterTurretSubsystem m_turret;
-
+  private final LimeLight m_limelight;
   private double m_position;
 
   private double m_endpoint;
 
   private int onTarget;
 
-  public PositionTurret(ShooterTurretSubsystem turret) {
+  public PositionTurretToVision(ShooterTurretSubsystem turret, double position, LimeLight limelight) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_turret = turret;
-    m_position = m_turret.getTurretAngle();
-    addRequirements(m_turret);
-  }
-
-  public PositionTurret(ShooterTurretSubsystem turret, double position) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    m_turret = turret;
-
+    m_limelight = limelight;
     m_position = position;
     addRequirements(m_turret);
   }
@@ -44,7 +37,16 @@ public class PositionTurret extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if (!m_limelight.getIsTargetFound()) {
+      m_turret.visionCorrection = 0;
+
+    } else {
+      m_turret.visionCorrection = m_limelight.getdegRotationToTarget();
+    }
     m_turret.motionMagic(m_endpoint);
+
+    if (m_limelight.getVertOnTarget())
+      onTarget++;
   }
 
   // Called once the command ends or is interrupted.

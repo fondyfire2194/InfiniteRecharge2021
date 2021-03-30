@@ -12,9 +12,9 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.LimeLight;
 import frc.robot.commands.PositionTilt;
-import frc.robot.commands.PositionTiltandLock;
+import frc.robot.commands.PositionTiltToVision;
 import frc.robot.commands.PositionTurret;
-import frc.robot.commands.PositionTurretandLock;
+import frc.robot.commands.PositionTurretToVision;
 import frc.robot.commands.SetCameraPipeline;
 import frc.robot.commands.ShootCells;
 import frc.robot.commands.StartShooter;
@@ -46,15 +46,15 @@ public class Auto0 extends SequentialCommandGroup {
     // super(new FooCommand(), new BarCommand());
 
     super(new TiltMoveToReverseLimit(tilt), new SetCameraPipeline(limelight, pipeline), new StartShooter(shooter),
-        new ParallelCommandGroup(new PositionTiltandLock(tilt, limelight, tiltTurns),
-            new PositionTurretandLock(turret, limelight, turretAngle)),
+        new ParallelCommandGroup(new PositionTiltToVision(tilt,tiltTurns, limelight),
+            new PositionTurretToVision(turret, turretAngle, limelight)),
         // s_trajectory.getRamsete(s_trajectory.centerStart).andThen(() ->
         // drive.tankDriveVolts(0, 0)),
 
         new ParallelCommandGroup(new ShootCells(shooter, transport, compressor, shootSpeed, shootTime)
-            .deadlineWith(new ParallelCommandGroup(new PositionTilt(tilt)), new PositionHoldTurret(turret))),
+            .deadlineWith(new ParallelCommandGroup(new PositionTilt(tilt)), new PositionTurret(turret))),
 
-        new ParallelCommandGroup(new PositionTilt(tilt, -1), new PositionTurret(turret, 0)));
+        new ParallelCommandGroup(new PositionTilt(tilt), new PositionTurret(turret)));
 
   }
 }

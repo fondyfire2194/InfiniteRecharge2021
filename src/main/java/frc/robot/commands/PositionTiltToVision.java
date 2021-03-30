@@ -6,45 +6,44 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.LimeLight;
-import frc.robot.subsystems.ShooterTurretSubsystem;
+import frc.robot.subsystems.ShooterTiltSubsystem;
 
-public class PositionTurret extends CommandBase {
+public class PositionTiltToVision extends CommandBase {
   /** Creates a new PositionTilt. */
 
-  private final ShooterTurretSubsystem m_turret;
+  private final ShooterTiltSubsystem m_tilt;
+
+  private final LimeLight m_limelight;
 
   private double m_position;
 
   private double m_endpoint;
 
-  private int onTarget;
-
-  public PositionTurret(ShooterTurretSubsystem turret) {
+  public PositionTiltToVision(ShooterTiltSubsystem tilt, double position, LimeLight limelight) {
     // Use addRequirements() here to declare subsystem dependencies.
-    m_turret = turret;
-    m_position = m_turret.getTurretAngle();
-    addRequirements(m_turret);
-  }
-
-  public PositionTurret(ShooterTurretSubsystem turret, double position) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    m_turret = turret;
-
+    m_tilt = tilt;
     m_position = position;
-    addRequirements(m_turret);
+    m_limelight = limelight;
+    addRequirements(m_tilt);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_endpoint = m_position * m_turret.encoderCountsPerDegree;
-    m_turret.visionCorrection = 0;
+    m_endpoint = m_position * m_tilt.encoderCountsPerDegree;
+    m_tilt.visionCorrection = 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_turret.motionMagic(m_endpoint);
+    if (!m_limelight.getIsTargetFound()) {
+      m_tilt.visionCorrection = 0;
+
+    } else {
+      m_tilt.visionCorrection = m_limelight.getdegVerticalToTarget();
+    }
+    m_tilt.motionMagic(m_endpoint);
   }
 
   // Called once the command ends or is interrupted.

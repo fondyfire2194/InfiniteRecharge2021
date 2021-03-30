@@ -44,7 +44,7 @@ public class HoldTiltPositionMotionMagic extends CommandBase {
 		m_tilt.m_tiltMotor.config_kI(0, Pref.getPref("ElevatorMMKi"), 0);
 		m_tilt.m_tiltMotor.config_kD(0, Pref.getPref("ElevatorMMKd"), 0);
 
-		m_tilt.holdPositionDegrees = m_tilt.getTiltAngle();
+		m_tilt.holdPositionDegrees = m_tilt.getTiltPositionDegrees();
 		m_tilt.lastHoldPositionDegrees = m_tilt.holdPositionDegrees + .01;
 
 	}
