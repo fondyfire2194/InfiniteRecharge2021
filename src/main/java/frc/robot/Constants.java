@@ -23,8 +23,8 @@ import edu.wpi.first.wpilibj.util.Units;
 public final class Constants {
 
    public static final int PDP = 1;
-public static final double TURRET_POSITION_RATE = 1;
-public static final double TILT_POSITION_RATE = 1;
+   public static final double TURRET_POSITION_RATE = 1;
+   public static final double TILT_POSITION_RATE = 1;
 
    public static final class DriveConstants {
 
@@ -68,9 +68,10 @@ public static final double TILT_POSITION_RATE = 1;
       public static double kPositionRateToleranceMetersPerS = 0.1;
       public static double kPositionToleranceMeters = 0.1;
       public static double kPositionI = 0.;
-
+      public static double kPositionP = .01;
+      public static double kPositionD = .0;
       public static double kMaxPositionAccelerationMetersPerSSquared = 0.;
-      public static double positionkP = .01;
+
       public static double kPDriveVel = .5;
       public static double kPickupSpeedMetersPerSecond = 1;
 
@@ -92,32 +93,41 @@ public static final double TILT_POSITION_RATE = 1;
       public static final int RIGHT_MOTOR = 11;
       public static final int ROTATE_MOTOR = 12;
 
-      //tilt
+      // tilt
       public static final int TILT_MOTOR = 13;
       public static final double MAX_SPEED = 5500.;
       public static final double MIN_SPEED = 1500.;
       public static final double SPEED_INCREMENT = 250.;
 
-      //turret
+      public static final double TILT_DEG_PER_ENCODER_REV = .029;
+      public static final double TILT_MIN_TURNS = 0;
+      public static final double TILT_MAX_TURNS = 10;
+
+      // turret
 
       public static final double TURRET_MAX_ANGLE = 100;
       public static final double TURRET_MIN_ANGLE = -100;
       public static final double TurretSpeed = 0.025;
+
       /**
        * 100 output revs of turret gearbox turns an 18 tooth pinion one time There are
        * 222 teeth in 360 degrees, so 1 tooth = 360/220 = 1.64 degrees So 18 teeth
        * (100 revs) = 18 * 1.64 = 29.5 degrees and one gearbox output rev is .295
        * degrees With a 100:1 gearbox that makes 1 motor encoder rev = .00295degrees
        * 29.5 degrees is 4096 *100 counts 1 degree is 13847.458 count
+       * 
+       * MotionMagic velocities are in encoder counts per 100ms
+       * 
+       * 1 turret degree per sec is 13847.458 counts per sec or 1385 counts per 100 ms
+       * 
+       * 
+       * 
+       * 
        */
       public static final double TURRET_ENCODER_DEG_PER_TURRET_REV = .00295;
-      public static final double TURRET_ENCODER_COUNTS_PER_REV  = 4096;
-      public static final double TURRET_ENCODER_COUNTS_PER_TURRET_DEGREE = 138847;//.4096/.0295;
-      
-
-      public static final double TILT_DEG_PER_ENCODER_REV = .029;
-      public static final double TILT_MIN_TURNS = 0;
-      public static final double TILT_MAX_TURNS = 10;
+      public static final double TURRET_ENCODER_COUNTS_PER_REV = 4096;
+      public static final double TURRET_ENCODER_COUNTS_PER_TURRET_DEGREE = 138847;// .4096/.0295;
+      public static final int TURRET_ENCODER_COUNTS_PER_100MS_PER_TURRET_DEGREES_PER_SEC = 1385;
 
       public static final double TARGET_HEIGHT = Units.inchesToMeters(94);
       public static final double BASE_CAMERA_HEIGHT = Units.inchesToMeters(26);

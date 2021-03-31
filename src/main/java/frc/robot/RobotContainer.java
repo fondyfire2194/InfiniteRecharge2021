@@ -31,14 +31,10 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.LimelightControlMode.StreamType;
 import frc.robot.commands.AutoSwitchZoom;
 import frc.robot.commands.EndLogData;
-import frc.robot.commands.HoldTiltPositionMotionMagic;
-import frc.robot.commands.HoldTurretPositionMotionMagic;
-import frc.robot.commands.LockTiltOnTarget;
 import frc.robot.commands.LogDistanceData;
 import frc.robot.commands.LogTrajData;
 import frc.robot.commands.PositionTilt;
 import frc.robot.commands.PositionTurret;
-import frc.robot.commands.PositionTurretToVision;
 import frc.robot.commands.ResetEncoders;
 import frc.robot.commands.ResetGyro;
 import frc.robot.commands.ResetPose;
@@ -49,7 +45,6 @@ import frc.robot.commands.ShootCells;
 import frc.robot.commands.StartRearIntake;
 import frc.robot.commands.StartShooter;
 import frc.robot.commands.StopShoot;
-import frc.robot.commands.TiltFindTarget;
 import frc.robot.commands.ToggleDriverCam;
 import frc.robot.subsystems.CellTransportSubsystem;
 import frc.robot.subsystems.ControlPanelSubsystem;
@@ -140,26 +135,25 @@ public class RobotContainer {
             // // //Configure the button bindings
 
             configureButtonBindings();
-
-            SmartDashboard.putData(new ResetEncoders(m_robotDrive));
-            SmartDashboard.putData(new ResetGyro(m_robotDrive));
-            SmartDashboard.putData(new ResetPose(m_robotDrive));
+            ShuffleboardTab driveTab = Shuffleboard.getTab("Drive");
+            driveTab.add("Reset Encoders", new InstantCommand(() -> m_robotDrive.resetEncoders()));
+            driveTab.add("Reset Gyro",new ResetGyro(m_robotDrive));
+            driveTab.add("Reset Pose",new ResetPose(m_robotDrive));
+            // SmartDashboard.putData(new ResetEncoders(m_robotDrive));
+            // SmartDashboard.putData(new ResetGyro(m_robotDrive));
+            // SmartDashboard.putData(new ResetPose(m_robotDrive));
 
             SmartDashboard.putData(new ResetShooterAngle(m_turret));
             SmartDashboard.putData(new ResetShooterTilt(m_tilt));
             SmartDashboard.putData(new ShootCells(m_shooter, m_transport, m_compressor, 3000, 0));
 
-            SmartDashboard.putData(new LockTiltOnTarget(m_tilt, m_limelight));
-
             SmartDashboard.putData("TiltTo5", new PositionTilt(m_tilt, 4));
             SmartDashboard.putData("TiltTo)", new PositionTilt(m_tilt, -1.5));
 
- 
             SmartDashboard.putData("TurretTo +10", new PositionTurret(m_turret, 10));// degrees
             SmartDashboard.putData("TurretTo -10", new PositionTurret(m_turret, -10));// degrees
             SmartDashboard.putData("TurretTo +0", new PositionTurret(m_turret, 0));// degrees
 
- 
             SmartDashboard.putData("LogData", new LogDistanceData(m_robotDrive, m_turret, m_tilt, m_limelight));
             SmartDashboard.putData("EndLogData", new EndLogData(m_robotDrive));
 
@@ -212,11 +206,9 @@ public class RobotContainer {
             m_shooter.setDefaultCommand(
                         new RunCommand(() -> m_shooter.jogShooter(gamepad.getX(Hand.kLeft) / 5), m_shooter));
 
-            m_turret.setDefaultCommand(new HoldTurretPositionMotionMagic(m_turret));
+            m_turret.setDefaultCommand(new PositionTurret(m_turret));
 
-            m_tilt.setDefaultCommand(new HoldTiltPositionMotionMagic(m_tilt));    
-
-
+            m_tilt.setDefaultCommand(new PositionTilt(m_tilt));
 
             new RunCommand(() -> m_transport.runLeftBeltMotor(setupGamepad.getX(Hand.kLeft) / 2), m_transport);
       }
@@ -243,9 +235,6 @@ public class RobotContainer {
             new JoystickButton(m_driverController, 5).whenPressed(new SetCameraPipeline(m_limelight, 1)); // 2 x zoom
 
             new JoystickButton(m_driverController, 6).whenPressed(new ToggleDriverCam(m_limelight));
-
-            new JoystickButton(m_driverController, 6).whenPressed(new TiltFindTarget(m_tilt, m_limelight, true))
-                        .whenPressed(new LockTiltOnTarget(m_tilt, m_limelight));
 
             // co driver gamepad
             new JoystickButton(gamepad, Button.kY.value)

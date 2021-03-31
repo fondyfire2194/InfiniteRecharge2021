@@ -69,15 +69,18 @@ public class ShooterTurretSubsystem extends SubsystemBase {
       m_rotateMotor.setSensorPhase(true);
       m_rotateMotor.configVoltageCompSaturation(12, 0);
       m_rotateMotor.enableVoltageCompensation(true);
-      m_rotateMotor.configAllowableClosedloopError(0, TALON_TICK_THRESH, TALON_TIMEOUT_MS);
+      m_rotateMotor.configAllowableClosedloopError(5000, TALON_TICK_THRESH, TALON_TIMEOUT_MS);
       m_rotateMotor.configForwardSoftLimitEnable(false);
       m_rotateMotor.configReverseSoftLimitEnable(false);
       m_rotateMotor.configForwardSoftLimitThreshold(110);
-      m_rotateMotor.configReverseSoftLimitThreshold(10);
+      m_rotateMotor.configReverseSoftLimitThreshold(100);
       m_rotateMotor.configMotionSCurveStrength(2);
       /* Set acceleration and vcruise velocity - see documentation */
-      m_rotateMotor.configMotionCruiseVelocity(3000, TALON_TIMEOUT_MS);
-      m_rotateMotor.configMotionAcceleration(3000, TALON_TIMEOUT_MS);
+      final int cruiseVelocitydegreesPerSec = 10;
+      int cruiseVelocityCountsPer100ms = cruiseVelocitydegreesPerSec
+            * HoodedShooterConstants.TURRET_ENCODER_COUNTS_PER_100MS_PER_TURRET_DEGREES_PER_SEC;
+      m_rotateMotor.configMotionCruiseVelocity(cruiseVelocityCountsPer100ms, TALON_TIMEOUT_MS);
+      m_rotateMotor.configMotionAcceleration(cruiseVelocityCountsPer100ms * 3, TALON_TIMEOUT_MS);
 
       resetTurretPosition();
       commandAngle = 0;

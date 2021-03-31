@@ -8,6 +8,7 @@
 package frc.robot.subsystems;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -88,6 +90,11 @@ public class DriveSubsystem extends SubsystemBase {
       SmartDashboard.putBoolean("RFF", rff == CANError.kOk);
       m_leftFollower.follow(m_leftMaster);
       m_rightFollower.follow(m_rightMaster);
+      ShuffleboardLayout encoders = driveTab.getLayout("List Layout", "Encoders").withPosition(0, 0).withSize(2, 2);
+      encoders.add("Left Meters", getLeftDistanceMeters());
+      encoders.add("Right Meters", getRightDistanceMeters());
+      encoders.add("Left Encoder", m_leftMaster_encoder.getPosition());
+      encoders.add("Right Encoder", m_rightMaster_encoder.getPosition());
 
       // motor.add(m_leftMaster);
       // motor.add(m_leftFollower);
@@ -131,6 +138,8 @@ public class DriveSubsystem extends SubsystemBase {
       if (displaySelect >= 25) {
          displaySelect = 0;
 
+ 
+ 
          SmartDashboard.putNumber("LeftM", getLeftDistanceMeters());
          SmartDashboard.putNumber("RightM", getRightDistanceMeters());
 
